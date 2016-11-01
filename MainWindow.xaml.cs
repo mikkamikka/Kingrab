@@ -23,54 +23,35 @@ namespace Kingrab
 
     using System.Drawing;
 
-    /// <summary>
-    /// Interaction logic for MainWindow
-    /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        /// <summary>
-        /// Map depth range to byte range
-        /// </summary>
-        /// 
 
+        // Map depth range to byte range
         private int MaxRange = 2000;
 
         private int MapDepthToByte = 2500 / 256;
         
-        /// <summary>
-        /// Active Kinect sensor
-        /// </summary>
+        // Active Kinect sensor
         KinectSensor kinectSensor = null;
 
-        /// <summary>
-        /// Reader for depth frames
-        /// </summary>
+        // Reader for depth frames
         private DepthFrameReader depthFrameReader = null;
         private DepthFrameReader depthFrameReader2 = null;
 
-        /// <summary>
-        /// Description of the data contained in the depth frame
-        /// </summary>
+        // Description of the data contained in the depth frame
         private FrameDescription depthFrameDescription = null;
         static FrameDescription depthFrameDescription2 = null;
 
-        /// <summary>
-        /// Bitmap to display
-        /// </summary>
+         // Bitmap to display
         static WriteableBitmap depthBitmap = null;
-        //static WriteableBitmap depthBitmap2 = null;
 
         static Bitmap frame = null;
 
-        /// <summary>
-        /// Intermediate storage for frame data converted to color
-        /// </summary>
+        // Intermediate storage for frame data converted to color
         private byte[] depthPixels = null;
         private byte[] depthPixels2 = null;
 
-        /// <summary>
-        /// Current status text to display
-        /// </summary>
+        // Current status text to display
         private string statusText = null;
 
         // create instance of video writer
@@ -82,9 +63,6 @@ namespace Kingrab
 
         private int bitrate;
 
-        /// <summary>
-        /// Initializes a new instance of the MainWindow class.
-        /// </summary>
         public MainWindow()
         {
             // get the kinectSensor object
@@ -229,16 +207,13 @@ namespace Kingrab
             }
         }
 
+        
 
-
-        /// <summary>
-        /// INotifyPropertyChangedPropertyChanged event to allow window controls to bind to changeable data
-        /// </summary>
+        // INotifyPropertyChangedPropertyChanged event to allow window controls to bind to changeable data
         public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        /// Gets the bitmap to display
-        /// </summary>
+
+        // Gets the bitmap to display
         public ImageSource ImageSource
         {
             get
@@ -247,16 +222,14 @@ namespace Kingrab
             }
         }
 
-        /// <summary>
-        /// Gets or sets the current status text to display
-        /// </summary>
+
+        // Gets or sets the current status text to display
         public string StatusText
         {
             get
             {
                 return this.statusText;
             }
-
             set
             {
                 if (this.statusText != value)
@@ -272,11 +245,8 @@ namespace Kingrab
             }
         }
 
-        /// <summary>
-        /// Execute shutdown tasks
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
+
+        // Execute shutdown tasks
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
             if (this.depthFrameReader != null)
@@ -302,50 +272,8 @@ namespace Kingrab
             writer.Dispose();
         }
 
-        /// <summary>
-        /// Handles the user clicking on the screenshot button
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        private void ScreenshotButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (depthBitmap != null)
-            {
-                // create a png bitmap encoder which knows how to save a .png file
-                BitmapEncoder encoder = new PngBitmapEncoder();
 
-                // create frame from the writable bitmap and add to encoder
-                encoder.Frames.Add(BitmapFrame.Create(depthBitmap));
-
-                string time = System.DateTime.UtcNow.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
-
-                string myPhotos = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-
-                string path = Path.Combine(myPhotos, "KinectScreenshot-Depth-" + time + ".png");
-
-                // write the new file to disk
-                try
-                {
-                    // FileStream is IDisposable
-                    using (FileStream fs = new FileStream(path, FileMode.Create))
-                    {
-                        encoder.Save(fs);
-                    }
-
-                    this.StatusText = string.Format(CultureInfo.CurrentCulture, Properties.Resources.SavedScreenshotStatusTextFormat, path);
-                }
-                catch (IOException)
-                {
-                    this.StatusText = string.Format(CultureInfo.CurrentCulture, Properties.Resources.FailedScreenshotStatusTextFormat, path);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Handles the depth frame data arriving from the sensor
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
+        // Handles the depth frame data arriving from the sensor
         private void Reader_FrameArrived(object sender, DepthFrameArrivedEventArgs e)
         {
             bool depthFrameProcessed = false;
@@ -384,31 +312,16 @@ namespace Kingrab
                 if (isCaptureActive)
                 {
 
-                    //using (MemoryStream outStream = new MemoryStream())
-                    //{
-                    //    BitmapEncoder enc = new BmpBitmapEncoder();
-                    //    enc.Frames.Add(BitmapFrame.Create((BitmapSource)depthBitmap));
-                    //    enc.Save(outStream);
-                    //    frame = new System.Drawing.Bitmap(outStream);
-                    //}
-
-                    //writer.AddFrame(frame);
-
                     Timing.Text = stopwatch.Elapsed.TotalSeconds.ToString();
                 }
             }
         }
 
-        /// <summary>
-        /// Directly accesses the underlying image buffer of the DepthFrame to 
-        /// create a displayable bitmap.
-        /// This function requires the /unsafe compiler option as we make use of direct
-        /// access to the native memory pointed to by the depthFrameData pointer.
-        /// </summary>
-        /// <param name="depthFrameData">Pointer to the DepthFrame image data</param>
-        /// <param name="depthFrameDataSize">Size of the DepthFrame image data</param>
-        /// <param name="minDepth">The minimum reliable depth value for the frame</param>
-        /// <param name="maxDepth">The maximum reliable depth value for the frame</param>
+
+        // Directly accesses the underlying image buffer of the DepthFrame to 
+        // create a displayable bitmap.
+        // This function requires the /unsafe compiler option as we make use of direct
+        // access to the native memory pointed to by the depthFrameData pointer.
         private unsafe void ProcessDepthFrameData(IntPtr depthFrameData, uint depthFrameDataSize, ushort minDepth, ushort maxDepth)
         {
             // depth frame data is a 16 bit value
@@ -421,10 +334,8 @@ namespace Kingrab
                 ushort depth = frameData[i];
 
                 // To convert to a byte, we're mapping the depth value to the byte range.
-                // Values outside the reliable depth range are mapped to 0 (black).
-                //this.depthPixels[i] = (byte) (depth >= minDepth && depth <= maxDepth ? ( 255+56 - depth / MapDepthToByte ) : 0);
+                // Values outside the reliable depth range are mapped to 0 (black)
 
-                //
                 this.depthPixels[i] = (byte)(depth > minDepth && depth <= maxDepth ? scale(depth, 500, MaxRange, 255, 0) : 0);
                 //if (depth <= minDepth && depth > 0)
                 //{
@@ -453,15 +364,14 @@ namespace Kingrab
 
                 // To convert to a byte, we're mapping the depth value to the byte range.
                 // Values outside the reliable depth range are mapped to 0 (black).
-                //depthPixels2[i] = (byte)(depth >= minDepth && depth <= maxDepth ? (255 + 56 - depth / MapDepthToByte) : 0);
+
                 depthPixels2[i] = (byte)(depth >= minDepth && depth <= maxDepth ? scale(depth, 500, MaxRange, 255, 0) : 0);
                 //if (depth < minDepth && depth > 0) depthPixels2[i] = (byte)255;
             }
         }
 
-        /// <summary>
+
         /// Renders color pixels into the writeableBitmap.
-        /// </summary>
         private void RenderDepthPixels()
         {
             depthBitmap.WritePixels(
@@ -471,11 +381,7 @@ namespace Kingrab
                 0);                       
         }        
 
-        /// <summary>
         /// Handles the event which the sensor becomes unavailable (E.g. paused, closed, unplugged).
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
         private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
         {
             // on failure, set the status text
